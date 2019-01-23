@@ -22,6 +22,11 @@
   margin: 10px
 }
 
+#navHead{
+  margin-top: 0px;
+
+}
+
 
 .App-logo {
   animation: App-logo-spin infinite 20s linear;
@@ -61,9 +66,13 @@
 
 }
 
+#loopInput{
+  width: 20px;
+}
+
 .track{
   border-style: solid;
-  height: 33vh;
+  height: 23vh;
   margin: 10px;
   padding: 20px;
 

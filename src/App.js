@@ -35,19 +35,33 @@ class App extends Component {
   state={
     track:[],
     sounds:[],
+    sharpSounds:[],
     users: [],
     currentUser:{},
     tempo: 100,
     currentTrack:0,
-    waveType: "sine"
+    waveType: "sine",
+    filterType: "allpass",
+    loopLength: 5
   }
 
   componentDidMount(){
     fetch('http://localhost:3000/api/v1/sounds')
     .then(res => res.json())
     .then(soundsData => {
+
+
+      let sharpSoundAr =[]
+      sharpSoundAr = soundsData.filter(soundObj=> soundObj.id>11)
+
+
+      let regularSoundAr =[]
+      regularSoundAr = soundsData.filter(soundObj=> soundObj.id<12)
+
+
       this.setState({
-        sounds: soundsData
+        sounds: regularSoundAr,
+        sharpSounds: sharpSoundAr
       })
     })
 
@@ -65,13 +79,18 @@ class App extends Component {
     this.audioContext = new AudioContext();
     this.anyNote = this.audioContext.createOscillator()
     this.gotemcoach = new Audio(soundFile)
+    this.biquadFilter = this.audioContext.createBiquadFilter()
   }
 
   handleTrackPlay = (freq)=>{
     let osc = this.audioContext.createOscillator()
     osc.frequency.value = freq
     osc.type = this.state.waveType
-    osc.connect(this.audioContext.destination)
+    osc.connect(this.biquadFilter)
+    this.biquadFilter.type = this.state.filterType
+    // osc.connect(this.audioContext.destination)
+    this.biquadFilter.connect(this.audioContext.destination)
+
     osc.start()
     setTimeout(()=>osc.disconnect(), this.state.tempo)
   }
@@ -107,13 +126,14 @@ class App extends Component {
 
   resetTrack=()=>{
     this.setState({
-      track:[]
+      track:[],
+      currentTrack:0
     })
   }
 
-  deleteFromTrack=(soundObj)=>{
+  deleteFromTrack=(index)=>{
     let copyTrack = [...this.state.track]
-    let index = this.state.track.findIndex(s=> s.id ===soundObj.id)
+    // let index = this.state.track.findIndex(s=> s.id ===soundObj.id)
     copyTrack.splice(index,1)
     this.setState({
       track: copyTrack
@@ -134,9 +154,17 @@ class App extends Component {
   }
 
   handleTrackSelect =(track)=>{
+    let newAr = []
+    console.log(track.track_sounds)
+
+    track.track_sounds.forEach((trSound)=>{
+      newAr = [...newAr, trSound.sound]
+    })
+
+    console.log(newAr);
 
     this.setState({
-      track: track.sounds,
+      track: newAr,
       currentTrack: track.id
     })
 
@@ -164,7 +192,7 @@ class App extends Component {
     let copyCurrentUser = Object.assign({}, this.state.currentUser)
     // console.log(copyCurrentUser);
     let newObj = {sounds: this.state.track}
-    copyCurrentUser.tracks = [...copyCurrentUser.tracks, newObj]
+    copyCurrentUser.formattedTracks = [...copyCurrentUser.formattedTracks, newObj]
     // console.log(copyCurrentUser)
     this.setState({
       currentUser:copyCurrentUser
@@ -212,13 +240,11 @@ class App extends Component {
     // setTimeout(()=>this.playArray(array), this.state.track.length*this.state.tempo )
     // setTimeout(()=>this.playArray(array), 2*(this.state.track.length*this.state.tempo) )
     let i = 1
-    while (i < 10) {
+    while (i <= this.state.loopLength) {
       setTimeout(()=>this.playArray(array), i*(this.state.track.length*this.state.tempo) )
       i++;
       }
   }
-
-
 
   gotem=()=>{
     console.log("sup");
@@ -226,9 +252,22 @@ class App extends Component {
   }
 
   handleWaveSelect =(event)=>{
-    console.log(event.target.value)
+
     this.setState({
       waveType:event.target.value
+    })
+  }
+
+  handleFilterSelect =(event)=>{
+    console.log(event.target.value)
+    this.setState({
+      filterType:event.target.value
+    })
+  }
+
+  handleLoopLength =(event)=>{
+    this.setState({
+      loopLength: event.target.value
     })
   }
 
@@ -240,11 +279,14 @@ class App extends Component {
       <div className="App">
         <div className="one">
           <div className="nav">
-          <h2>Nav</h2>
-          <button onClick={()=>this.loop(this.state.track)} >Loop</button>
+          <h2 id="navHead" >Nav</h2>
           <button onClick={()=>this.playArray(this.state.track)}>Play Track</button>
-          <button onClick={this.start}>Start</button><br></br>
+          <button onClick={this.start}>Start</button><br></br> <br></br>
+          Loop Length<input id="loopInput" onChange={(event)=>this.handleLoopLength(event)} type="text"></input> {''}
+          <button onClick={()=>this.loop(this.state.track)} >Loop</button>
+
           <br></br>
+
             <form>Wave Type:
               <select onChange={(event)=>this.handleWaveSelect(event)} id="mySelect">
                 <option>sine</option>
@@ -253,11 +295,18 @@ class App extends Component {
                 <option>sawtooth</option>
               </select>
             </form>
+            <form>Filter Type:
+              <select onChange={(event)=>this.handleFilterSelect(event)} id="mySelect">
+                <option>allpass</option>
+                <option>lowpass</option>
+                <option>highpass</option>
+              </select>
+            </form>
           Tempo: <input onChange={this.handleTempo} type="range" min="100" max="1000" value={this.state.tempo} />
           </div>
           <div className="sound-container">
           <h2>Sounds</h2>
-          <SoundContainer playAnyFrequency={this.playAnyFrequency} sounds={this.state.sounds}/>
+          <SoundContainer playAnyFrequency={this.playAnyFrequency} sounds={this.state.sounds} sharpSounds={this.state.sharpSounds} />
           </div>
           <div className="track">
           <h2>Track</h2>
