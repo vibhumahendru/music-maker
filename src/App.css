@@ -1,6 +1,27 @@
 .App {
   text-align: center;
+  display: flex;
+  justify-content: space-between;
+
 }
+
+/* .one{
+  display: flex;
+  flex-direction: column;
+}
+
+.two{
+  display: flex;
+
+} */
+
+.nav{
+  border-style: solid;
+  height: 23vh;
+  padding: 20px;
+  margin: 10px
+}
+
 
 .App-logo {
   animation: App-logo-spin infinite 20s linear;
@@ -16,6 +37,37 @@
   justify-content: center;
   font-size: calc(10px + 2vmin);
   color: white;
+}
+
+.user-image{
+  width: 50px
+}
+
+.sound-container{
+  border-style: solid;
+  margin: 10px;
+  padding: 20px;
+
+
+
+}
+
+.user-container{
+  border-style: solid;
+  margin: 10px;
+  padding: 20px;
+
+
+
+}
+
+.track{
+  border-style: solid;
+  height: 33vh;
+  margin: 10px;
+  padding: 20px;
+
+
 }
 
 .App-link {
