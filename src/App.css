@@ -17,9 +17,14 @@
 
 .nav{
   border-style: solid;
-  height: 23vh;
+  height: 30vh;
   padding: 20px;
   margin: 10px
+}
+
+.welcome{
+  background-color: orange;
+  height: 100vh;
 }
 
 #navHead{

@@ -4,7 +4,9 @@ import './App.css';
 import SoundContainer from './components/SoundContainer.js'
 import Track from './components/Track.js'
 import UserContainer from './components/UserContainer.js'
-import soundFile from './gotemcoach.mp3'
+
+import soundFile from './beatbox120bpm.mp3'
+import {BrowserRouter as Router, Route} from "react-router-dom"
 
 
 
@@ -38,11 +40,12 @@ class App extends Component {
     sharpSounds:[],
     users: [],
     currentUser:{},
-    tempo: 100,
+    tempo: 250,
     currentTrack:0,
     waveType: "sine",
     filterType: "allpass",
-    loopLength: 5
+    loopLength: 5,
+    backingTrack: false
   }
 
   componentDidMount(){
@@ -78,7 +81,7 @@ class App extends Component {
     super()
     this.audioContext = new AudioContext();
     this.anyNote = this.audioContext.createOscillator()
-    this.gotemcoach = new Audio(soundFile)
+    this.beatbox120bpm = new Audio(soundFile)
     this.biquadFilter = this.audioContext.createBiquadFilter()
   }
 
@@ -116,7 +119,9 @@ class App extends Component {
   }
 
   playArray = (array)=>{
-    // this.gotemcoach.play()
+    if (this.state.backingTrack) {
+        this.beatbox120bpm.play()
+      }
     array.forEach((soundObj,index) => {
       setTimeout(() => this.handleTrackPlay(soundObj.freq), this.state.tempo*index)
     })
@@ -272,11 +277,28 @@ class App extends Component {
   }
 
 
+  handleBackingTrack=(event)=>{
+    console.log(event.target.checked)
+    if (event.target.checked) {
+      this.setState({
+        backingTrack:true
+      })
+    }else{
+      this.setState({
+        backingTrack:false
+      })
+    }
+  }
+
+
 
   render() {
 
     return (
       <div className="App">
+
+
+
         <div className="one">
           <div className="nav">
           <h2 id="navHead" >Nav</h2>
@@ -302,7 +324,9 @@ class App extends Component {
                 <option>highpass</option>
               </select>
             </form>
-          Tempo: <input onChange={this.handleTempo} type="range" min="100" max="1000" value={this.state.tempo} />
+            
+          Tempo: <input onChange={this.handleTempo} type="range" min="100" max="1000" value={this.state.tempo} /><br></br>
+          Backing Track: <input onChange={(event)=>this.handleBackingTrack(event)} type="checkbox" ></input>
           </div>
           <div className="sound-container">
           <h2>Sounds</h2>
@@ -316,6 +340,8 @@ class App extends Component {
         <div className="two">
           <UserContainer handleTrackSelect={this.handleTrackSelect} currentUser={this.state.currentUser} handleUserSelect={this.handleUserSelect} users={this.state.users} />
         </div>
+
+
       </div>
     );
   }
